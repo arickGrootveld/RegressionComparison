@@ -134,15 +134,19 @@ def plotTargFunctionAndRegressionFunction(targetFunction, regressionFuncCoeffici
     plt.show()
 
 if __name__ == '__main__':
-    ## Parameters of the simulation
-    degreeOfTarget = 10
-    degreeOfRegression = 2
-    numTrainSamples = 2
-    numTestSamples = 1000
+    ## Parameters of the regression and target functions
+    degreeOfTarget = 50
+    degreeOfRegression = 10
+    numTrainSamples = 100
+    numTestSamples = 100
+
+    # Parameters of the sampling distribution for x's
+    x_upperBound = 10
+    x_lowerBound = -10
 
     # Generate a target function and then perform regression analysis, and then report and plot the results
-    targFunc_Train = generateTargetFunction(degreeOfTarget, numSamps=numTrainSamples)
-    targFunc_Test = generateTargetFunction(degreeOfTarget, numSamps=numTestSamples, randCoeffs=False, coefficients=targFunc_Train['coeffs'])
+    targFunc_Train = generateTargetFunction(degreeOfTarget, numSamps=numTrainSamples, x_dist='uniform', x_lb=x_lowerBound, x_ub=x_upperBound)
+    targFunc_Test = generateTargetFunction(degreeOfTarget, numSamps=numTestSamples, randCoeffs=False, coefficients=targFunc_Train['coeffs'], x_dist='uniform', x_lb=x_lowerBound, x_ub=x_upperBound)
 
 
     [regressionCoeffs, polyRegression] = fitPolynomialRegressionLine(targFunc_Train['x_values'], targFunc_Train['y_values'], degree=degreeOfRegression)
@@ -152,7 +156,3 @@ if __name__ == '__main__':
 
     # Plotting the target function and the regression line
     plotTargFunctionAndRegressionFunction(targFunc_Test, regressionFuncCoefficients=regressionCoeffs)
-
-    print('this is here')
-
-

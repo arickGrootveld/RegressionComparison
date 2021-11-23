@@ -20,12 +20,29 @@ from matplotlib import pyplot as plt
 ##                           False. Allows manually setting the coefficients
 ##                           of the target function. Must be a list of real
 ##                           numbers
+##      x_dist ('normal'): [string] A string specifying the sampling 
+##                                  distribution of the x_values. 
+##                                  Several other parameters will
+##                                  be used or ignored depending on
+##                                  this parameter (specifically 'x_mean', 
+##                                  'x_std' will be used if x_dist='norm', 
+##                                  and 'x_ub', 'x_lb' will be used
+##                                  if x_dist='uniform')
+##                                  Options are {'normal', 'uniform'}
 ##      x_mean (0): [int/float] Mean of the distribution to be used for 
 ##                            generating the samples of x (the target values
-##                            input to the target function)
+##                            input to the target function). Will only be used
+##                            if x_dist='normal'
 ##      x_std (1): [int/float] Standard deviation of the distribution to
 ##                             be used for generating the samples of x 
-##                             (see "x_mean" for better description of x)
+##                             (see "x_mean" for better description of x).
+##                             Will only be used if x_dist='normal'
+##      x_lb (0): [int/float] Lower bound of the x-values to be generated
+##                            from the uniform distribution. Will only
+##                            be used if x_dist='uniform'
+##      x_ub (10): [int/float] Upper bound of the x-values to be generated
+##                             from the uniform distribution. Will only
+##                             be used if x_dist='uniform'
 ##      noise_mean (0): [int/float] Mean of the noise term (epsilon)
 ##      noise_std (1): [int/float] Standard deviation of the noise term (epsilon).
 ##                                 If this is set to be less than or equal 
@@ -70,16 +87,42 @@ def generateTargetFunction(order, numSamps=10, randCoeffs=True, **kwargs):
         coeffs = np.random.normal(loc=0, scale=1, size=order)
     
     
-    # Defaulting parameters
-    if(not 'x_mean' in kwargs.keys()):
-        x_mean = 0
+    ## Defaulting parameters
+
+
+    # Checking what x_dist is set to and then defaulting parameters appropriately
+    if(not 'x_dist' in kwargs.keys()):
+        x_dist = 'normal'
     else:
-        x_mean = kwargs['x_mean']
+        x_dist = kwargs['x_dist']
     
-    if(not 'x_std' in kwargs.keys()):
-        x_std = 1
+    # Checking the x_dist parameter and defaulting parameters based on this
+    if(x_dist == 'normal'):
+        if(not 'x_mean' in kwargs.keys()):
+            x_mean = 0
+        else:
+            x_mean = kwargs['x_mean']
+        if(not 'x_std' in kwargs.keys()):
+            x_std = 1
+        else:
+            x_std = kwargs['x_std']
+    elif(x_dist == 'uniform'):
+        if(not 'x_lb' in kwargs.keys()):
+            x_lb = 0
+        else:
+            x_lb = kwargs['x_lb']
+        
+        if(not 'x_ub' in kwargs.keys()):
+            x_ub = 10
+        else: 
+            x_ub = kwargs['x_ub']
+    # Only get here if the x_dist parameter was set but wasn't one of the two allowable options
     else:
-        x_std = kwargs['x_std']
+        if(not isinstance(kwargs['x_dist'], str)):
+            raise Exception('x_dist was set to a non-string value')
+        else:
+
+            raise Exception('Parameter passed in for x_dist was: ' + kwargs['x_dist'] + '. Which is not a viable distribution, it should be one of [\'normal\', \'uniform\']')
 
     if(not 'noise_mean' in kwargs.keys()):
         noise_mean = 0
@@ -91,10 +134,14 @@ def generateTargetFunction(order, numSamps=10, randCoeffs=True, **kwargs):
     else:
         noise_std = kwargs['noise_std']
 
-
-    # Generating the x-values to go with the samples from a normal dist.
-    x_values = np.random.normal(loc=x_mean, scale=x_std, size=numSamps).reshape(numSamps, 1)
-    
+    if(x_dist == 'normal'):
+        rng = np.random.default_rng()
+        # Generating the x-values to go with the samples from a normal dist.
+        x_values = rng.normal(loc=x_mean, scale=x_std, size=numSamps).reshape(numSamps, 1)
+    elif(x_dist == 'uniform'):
+        rng = np.random.default_rng()
+        # Generating the x-values to go with the samples from a continuous uniform dist.
+        x_values = rng.uniform(low=x_lb, high=x_ub, size=numSamps).reshape(numSamps, 1)
     
     # Setting up the y_values and the noise term
     y_values = np.zeros((numSamps, 1))
