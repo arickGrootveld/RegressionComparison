@@ -467,10 +467,10 @@ def regressionLinesSimulation(targFuncOrder, polyOrders, numTrainSamps, numTestS
 
         (polyRegPreds, polyRegResids, polyRegressionMSE) = testPolynomialRegression(testTargFunction['x_values'], testTargFunction['y_values'], polyRegModel)
         polyRegMSEs.append(polyRegressionMSE)
-
-    print("{:<25} {:<25} {:<25}".format("Target Func. Order",'Regression Function Order', 'MSE'))
-    for i in range(0, len(polyRegMSEs)):
-        print("{:<25} {:<25} {:<25}".format(str(targFuncOrder), str(polyOrders[i]), str(polyRegMSEs[i])))
+    if(printTableOfRegMSEs == True):
+        print("{:<25} {:<25} {:<25}".format("Target Func. Order",'Regression Function Order', 'MSE'))
+        for i in range(0, len(polyRegMSEs)):
+            print("{:<25} {:<25} {:<25}".format(str(targFuncOrder), str(polyOrders[i]), str(polyRegMSEs[i])))
 
     if(plotLines == True):
         plotMultiplePolynomialRegressionLines(testTargFunction, polyRegressionModelCoeffs)
