@@ -51,7 +51,7 @@ def generateTargetFunction(order, numSamps=10, randCoeffs=True, **kwargs):
             raise Exception('"randCoeffs" set to False, but "coefficients" parameter not set')
         elif(not len(kwargs['coefficients']) == order):
             raise Exception('"coefficients" parameter does not have length equal to "order"')
-        elif(not all(isinstance(x, (int, long) ) for x in  kwargs['coefficients']) ):
+        elif(not all(isinstance(x, (int, float) ) for x in  kwargs['coefficients']) ):
             raise Exception('"coefficients" parameter contains non-numerics')
         
         # If we got this far, that means we have the coefficients given to us already
@@ -150,7 +150,4 @@ def plotTargetFunctionAndSamples(x_values, y_values, targFuncCoeffs):
 if __name__ == '__main__':
     test = generateTargetFunction(order=5, randCoeffs=False, coefficients=[1, 0, -2, 1, 0], noise_std=1, 
         numSamps=100, x_mean=0)
-    # print(test['x_values'])
-    # print(test['y_values'])
-    # print(test['coeffs'])
     plotTargetFunctionAndSamples(test['x_values'], test['y_values'], test['coeffs'])
