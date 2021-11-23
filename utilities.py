@@ -4,7 +4,6 @@ from sklearn.preprocessing import PolynomialFeatures
 from matplotlib.pyplot import cm
 from matplotlib import pyplot as plt
 
-
 import numpy as np
 
 ### Function generateTargetFunction(order, numSamps=10, **kwargs)
