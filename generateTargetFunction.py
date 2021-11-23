@@ -4,6 +4,7 @@ from matplotlib import pyplot as plt
 ### Function generateTargetFunction(order, randCoeffs=True, **kwargs)
 ## Generates a polynomial target function based on the parameters 
 ## passed to it
+##  
 ##  Parameters:
 ##      order: [integer] The polynomial order of the target function
 ##      numSamps (10): [integer] The number of samples to generate from
@@ -15,31 +16,38 @@ from matplotlib import pyplot as plt
 ##                                   matching the order parameter, 
 ##                                   containing real numbers to be used 
 ##                                   as the coefficients of the polynomial
-##      coefficients: [list] only used when the randCoeffs parameter is
+##      coefficients: [list] Only used when the randCoeffs parameter is
 ##                           False. Allows manually setting the coefficients
 ##                           of the target function. Must be a list of real
 ##                           numbers
-##      x_mean (0): [int/float] mean of the distribution to be used for 
+##      x_mean (0): [int/float] Mean of the distribution to be used for 
 ##                            generating the samples of x (the target values
 ##                            input to the target function)
-##      x_std (1): [int/float] standard deviation of the distribution to
+##      x_std (1): [int/float] Standard deviation of the distribution to
 ##                             be used for generating the samples of x 
 ##                             (see "x_mean" for better description of x)
-##      noise_mean (0): [int/float] mean of the noise term (epsilon)
-##      noise_std (1): [int/float] std of the noise term (epsilon).
+##      noise_mean (0): [int/float] Mean of the noise term (epsilon)
+##      noise_std (1): [int/float] Standard deviation of the noise term (epsilon).
 ##                                 If this is set to be less than or equal 
 ##                                 to 0, then no noise will be added to the 
 ##                                 target function
 ##                                  
-##  Outputs:
-##      returnData: [dict] dictionary with keys ('x_data', 'y_data', 'coeffs')
-##              returnData['x_data']: [numpy array {numSamps by 1}] x values generated from
+##  Outputs: returnData
+##      returnData: [dict] Dictionary with keys ('x_data', 'y_data', 'coeffs')
+##              returnData['x_data']: [numpy array {numSamps by 1}] X values generated from
 ##                                                                  a normal distribution plugged
 ##                                                                  into the target function
-##              returnData['y_data']: [numy array {numSamps by 1}] y values associated with the
+##              returnData['y_data']: [numy array {numSamps by 1}] Y values associated with the
 ##                                                                 x values from the target function
-##              returnData['coeffs']: [numpy array {order by 1}] the coefficients of the target function
+##              returnData['coeffs']: [numpy array {order by 1}] The coefficients of the target function
 def generateTargetFunction(order, numSamps=10, randCoeffs=True, **kwargs):
+
+    # This is just to make this function line up with scikit learns polynomial fit
+    # function, so that a 0th order function is just a constant, 
+    # a 1st order function is an affine function, and a 2nd order
+    # function is a function with an intercept, a linear component
+    # and a quadratic term
+    order = order + 1
 
     returnData = dict()
 
@@ -85,24 +93,24 @@ def generateTargetFunction(order, numSamps=10, randCoeffs=True, **kwargs):
 
 
     # Generating the x-values to go with the samples from a normal dist.
-    x_values = np.random.normal(loc=x_mean, scale=x_std, size=numSamps)
+    x_values = np.random.normal(loc=x_mean, scale=x_std, size=numSamps).reshape(numSamps, 1)
     
     
     # Setting up the y_values and the noise term
-    y_values = np.zeros((numSamps))
+    y_values = np.zeros((numSamps, 1))
 
 
     if(noise_std <= 0):
-        noiseValues = np.zeros((numSamps))
+        noiseValues = np.zeros((numSamps, 1))
     else:
-        noiseValues = np.random.normal(loc=noise_mean, scale=noise_std, size=numSamps)
+        noiseValues = np.random.normal(loc=noise_mean, scale=noise_std, size=numSamps).reshape(numSamps, 1)
 
     y_values = y_values + noiseValues
 
     # Looping over for each of the elements of the coefficients, to generate the samples from that order
     currentOrder = 0
     for i in coeffs:
-        y_values = y_values + ((x_values**currentOrder) * coeffs[currentOrder])
+        y_values = y_values + ((x_values**currentOrder) * coeffs[currentOrder]).reshape(numSamps, 1)
         currentOrder = currentOrder + 1
     
     returnData['x_values'] = x_values
@@ -113,13 +121,13 @@ def generateTargetFunction(order, numSamps=10, randCoeffs=True, **kwargs):
     
 ## Function plotTargetFunction(x_values, y_values, targFuncCoeffs)
 ## Plots a polynomial target function alongside its samples
+##
 ##  Parameters: 
-##      x_values: [list] list of the x values from the target function
-##      y_values: [list] list of the y values from the target function  
+##      x_values: [list] List of the x values from the target function
+##      y_values: [list] List of the y values from the target function  
 ##                 i.e. (f(x) = y = coeffs_0 + coeffs_1 x + coeffs_2 x^2 + ...)
-##      coeffs: [list] the coefficients of the target function to be plotted
+##      coeffs: [list] The coefficients of the target function to be plotted
 def plotTargetFunctionAndSamples(x_values, y_values, targFuncCoeffs):
-    print('hello')
     # Setting up parameters to be used for plotting
     startingXValue = np.min(x_values) - 1
     endingXValue = np.max(x_values) + 1
@@ -144,10 +152,44 @@ def plotTargetFunctionAndSamples(x_values, y_values, targFuncCoeffs):
 
     plt.show()
 
+## Function generatePlottableValues(polyCoeffs, x_lowerBound=0, x_upperBound=1, stepSize=0.01)
+## Generates x and y values appropriate for
+## plotting the polynomial function whos coefficients 
+## are passed to it
+##
+##  Parameters: 
+##      polyCoeffs: [list] List of numeric values corresponding to the
+##                         coefficients of the polynomial to be plotted
+##      x_lowerBound (0): [int/float] Lower bound of the x values to
+##                                    generate (i.e. farthest left x-value
+##                                    that you want plotted)
+##      x_upperBound (1): [int/float] Upper bound of the x values to 
+##                                    generate (i.e. farthest right x-value
+##                                    that you want plotted)
+##      stepSize (0.01): [int/float] The size of the steps to make between
+##                                   the lowerbound for x and the upperbound.
+##                                   the number of x & y values generated will 
+##                                   be: (x_upperBound - x_lowerBound) / stepSize
+##
+##  Outputs: (plottableXValues, plottableYValues)
+##      plottableXValues: [list] List of numeric values that are the x-values
+##                               that are meant to be plotted
+##      plottableYValues: [list] List of numeric values that are the y-values
+##                               that are meant to be plotted (based on the 
+##                               x-values and polynomial coefficients)
+def generatePlottableValues(polyCoeffs, x_lowerBound=0, x_upperBound=1, stepSize=0.01):
+    plottableXValues = np.arange(x_lowerBound, x_upperBound, step=stepSize)
+    plottableYValues = np.zeros((len(plottableXValues)))
 
+    curOrder = 0
+    for curCoeff in polyCoeffs:
+        plottableYValues = plottableYValues + (curCoeff * (plottableXValues**curOrder))
+        curOrder = curOrder + 1
+    return(plottableXValues, plottableYValues)
 
 
 if __name__ == '__main__':
-    test = generateTargetFunction(order=5, randCoeffs=False, coefficients=[1, 0, -2, 1, 0], noise_std=1, 
-        numSamps=100, x_mean=0)
+    # test = generateTargetFunction(order=5, randCoeffs=False, coefficients=[1, 0, -2, 1, 0], noise_std=1, 
+    #     numSamps=10, x_mean=0)
+    test = generateTargetFunction(order=4, randCoeffs=True, noise_std=1, numSamps=10, x_mean=0)
     plotTargetFunctionAndSamples(test['x_values'], test['y_values'], test['coeffs'])
