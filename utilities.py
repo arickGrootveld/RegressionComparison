@@ -255,7 +255,7 @@ def generatePlottableValues(polyCoeffs, x_lowerBound=0, x_upperBound=1, stepSize
     return(plottableXValues, plottableYValues)
 
 
-## fitPolynomialRegressionLine(xVals, yVals, degree=1)
+### fitPolynomialRegressionLine(xVals, yVals, degree=1)
 ## Function that fits a polynomial regression line of
 ## degree 'degree' to the xVals and yVals passed to it
 ##
